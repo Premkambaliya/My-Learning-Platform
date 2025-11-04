@@ -1,43 +1,31 @@
 import { Link } from "react-router-dom";
-import { useCourseContext } from "../../Context/CoursesContext";
 
-function CourseCard({ id, title, image, description }) {
-  const { joinedCourses, handleJoinCourse } = useCourseContext();
-  const isJoined = joinedCourses.includes(id);
-
-  const handleJoin = () => {
-    if (!isJoined) {
-      const success = handleJoinCourse(id);
-      if (success) {
-        alert(`You have joined ${title}!`);
-      }
-    }
-  };
-
+function CourseCard({ id, title, description, image, isJoined, handleJoinCourse }) {
   return (
-    <div className="border rounded-lg shadow-lg p-4 hover:shadow-xl transition-shadow bg-white animate-slide-up">
+    <div className="border rounded-lg shadow-md p-4 hover:shadow-xl transition">
       <img
         src={image}
         alt={title}
-        className="w-full h-40 object-cover rounded mb-4"
+        className="w-full h-48 object-cover rounded-md mb-4"
       />
-      <h3 className="text-xl font-bold mb-2">{title}</h3>
-      <p className="text-gray-600 mb-4">{description}</p>
-      <div className="flex justify-between items-center">
+      <h2 className="text-xl font-semibold mb-2">{title}</h2>
+      <p className="text-gray-600 mb-4 line-clamp-3">{description}</p>
+
+      <div className="flex flex-col sm:flex-row gap-2">
+        {/* Join / Joined Button */}
         <button
-          onClick={handleJoin}
-          className={`px-4 py-2 rounded text-white ${
-            isJoined
-              ? "bg-gray-400 cursor-not-allowed"
-              : "bg-blue-500 hover:bg-blue-600 transition-colors"
-          }`}
-          disabled={isJoined}
+          onClick={() => handleJoinCourse(id)}
+          className={`flex-1 py-2 rounded-md ${
+            isJoined ? "bg-green-500" : "bg-blue-500"
+          } text-white transition-colors`}
         >
-          {isJoined ? "Joined" : "Join"}
+          {isJoined ? "Joined" : "Join Course"}
         </button>
+
+        {/* View Details Button */}
         <Link
           to={`/course/${id}`}
-          className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition-colors"
+          className="flex-1 py-2 rounded-md bg-gray-700 text-white text-center hover:bg-gray-800 transition-colors"
         >
           View Details
         </Link>
