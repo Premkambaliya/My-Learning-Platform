@@ -1,3 +1,4 @@
+// models/user.js
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 
@@ -18,20 +19,25 @@ const userSchema = new mongoose.Schema({
     required: true,
     minlength: 6,
   },
+  joinedCourses: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Course",
+    },
+  ],
   createdAt: {
     type: Date,
     default: Date.now,
   },
 });
 
-// 🔐 Pre-save hook to hash password
+// 🔐 Hash password before save
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
   this.password = await bcrypt.hash(this.password, 10);
   next();
 });
 
-// 🔍 Method to compare entered password with hashed password
 userSchema.methods.comparePassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
