@@ -11,7 +11,7 @@ function CourseDetail() {
   useEffect(() => {
     const fetchCourse = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/api/courses/${id}`);
+        const response = await fetch(`https://my-learning-platform-0eju.onrender.com/api/courses/${id}`);
         if (!response.ok) {
           throw new Error("Failed to fetch course");
         }

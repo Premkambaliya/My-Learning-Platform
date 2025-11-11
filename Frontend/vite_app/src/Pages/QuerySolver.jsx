@@ -1,13 +1,5 @@
 import { useState, useEffect } from "react";
 
-/**
- * 💬 QuerySolver – Professional AI Chat Interface
- * Supports both Gemini (primary) and OpenAI (fallback)
- * Features:
- * - Elegant glassmorphic chat design
- * - Persistent chat history (sessionStorage)
- * - Clear error feedback & smooth animations
- */
 function QuerySolver() {
   const [query, setQuery] = useState("");
   const [chatHistory, setChatHistory] = useState([]);

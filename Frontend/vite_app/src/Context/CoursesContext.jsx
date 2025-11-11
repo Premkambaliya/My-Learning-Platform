@@ -66,7 +66,7 @@ export function CourseProvider({ children }) {
       if (user) {
         try {
           const token = localStorage.getItem("token");
-          const res = await fetch("http://localhost:5000/api/courses/user/joined", {
+          const res = await fetch("https://my-learning-platform-0eju.onrender.com/api/courses/user/joined", {
             headers: {
               Authorization: `Bearer ${token}`,
             },
@@ -109,7 +109,7 @@ export function CourseProvider({ children }) {
     }
 
     try {
-      const response = await fetch(`http://localhost:5000/api/courses/join/${courseId}`, {
+      const response = await fetch(`https://my-learning-platform-0eju.onrender.com/api/courses/join/${courseId}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -131,7 +131,7 @@ export function CourseProvider({ children }) {
       // Refresh from server to keep IDs and details in sync
       await (async () => {
         try {
-          const refetch = await fetch("http://localhost:5000/api/courses/user/joined", {
+          const refetch = await fetch("https://my-learning-platform-0eju.onrender.com/api/courses/user/joined", {
             headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
           });
           if (refetch.ok) {
@@ -156,7 +156,7 @@ export function CourseProvider({ children }) {
     }
 
     try {
-      const res = await fetch(`http://localhost:5000/api/courses/leave/${courseId}`, {
+      const res = await fetch(`https://my-learning-platform-0eju.onrender.com/api/courses/leave/${courseId}`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -169,7 +169,7 @@ export function CourseProvider({ children }) {
       if (res.ok) {
         // Refresh from server to sync IDs and details
         try {
-          const refetch = await fetch("http://localhost:5000/api/courses/user/joined", {
+          const refetch = await fetch("https://my-learning-platform-0eju.onrender.com/api/courses/user/joined", {
             headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
           });
           if (refetch.ok) {
