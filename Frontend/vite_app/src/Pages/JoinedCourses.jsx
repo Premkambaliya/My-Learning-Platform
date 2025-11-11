@@ -1,87 +1,149 @@
-import { useCourseContext } from "../Context/CoursesContext.jsx";
-import { Link } from "react-router-dom";
-import { useState, useEffect } from "react";
-
-
+// Pages/JoinedCourses.jsx
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../Context/AuthContext";
+import { useCourseContext } from "../Context/CoursesContext";
+import CourseCard from "../components/Course/CourseCard";
 
 function JoinedCourses() {
-  const [error, setError] = useState(null);
-  const [removingCourseId, setRemovingCourseId] = useState(null);
+  const { user } = useAuth();
+  const { joinedCoursesData, handleRemoveCourse } = useCourseContext();
+  const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
-  let joinedCourses, handleRemoveCourse;
-  try {
-    ({ joinedCourses, handleRemoveCourse } = useCourseContext());
-  } catch (err) {
-    setError("Failed to load joined courses. Please try again.");
-    return <div className="text-center text-red-500 py-12">{error}</div>;
+  useEffect(() => {
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+
+    if (joinedCoursesData && joinedCoursesData.length > 0) {
+      setCourses(joinedCoursesData);
+    } else {
+      setCourses([]);
+    }
+
+    setLoading(false);
+  }, [user, joinedCoursesData]);
+
+  if (!user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#F9FAFB] pt-20">
+        <div className="text-center">
+          <div className="w-16 h-16 bg-[#F59E0B]/10 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg
+              className="w-8 h-8 text-[#F59E0B]"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+              />
+            </svg>
+          </div>
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">
+            Authentication Required
+          </h2>
+          <p className="text-gray-600 mb-6">
+            Please log in to view your joined courses.
+          </p>
+          <button
+            onClick={() =>
+              navigate("/login", { state: { from: "/joined-courses" } })
+            }
+            className="px-6 py-3 bg-[#6366F1] text-white rounded-lg font-medium hover:bg-[#4F46E5] transition-colors"
+          >
+            Log In
+          </button>
+        </div>
+      </div>
+    );
   }
 
-  // Handle course removal with animation
-  const onRemoveCourse = (courseId, courseTitle) => {
-    setRemovingCourseId(courseId); // Trigger fade-out animation
-    setTimeout(() => {
-      const success = handleRemoveCourse(courseId);
-      if (success) {
-        alert(`You have removed ${courseTitle} from your joined courses.`);
-      }
-      setRemovingCourseId(null); // Reset after animation
-    }, 300); // Match with animation duration
-  };
-
-  // Filter courses to show only joined ones
-  const joinedCoursesData = courses.filter((course) => joinedCourses.includes(course.id));
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#F9FAFB] pt-20">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-[#6366F1] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-[#6B7280] text-lg font-medium">
+            Loading your courses...
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="container mx-auto p-20 animate-fade-in mt-10">
-      <h1 className="text-3xl font-bold mb-6 text-center">Your Joined Courses</h1>
-      {error ? (
-        <div className="text-center text-red-500 py-12">{error}</div>
-      ) : joinedCoursesData.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {joinedCoursesData.map((course) => (
-            <div
-              key={course.id}
-              className={`border rounded-lg shadow-lg p-4 bg-white hover:shadow-xl transition-shadow animate-slide-up ${
-                removingCourseId === course.id ? "animate-fade-out" : ""
-              }`}
-            >
-              <img
-                src={course.image}
-                alt={course.title}
-                className="w-full h-40 object-cover rounded mb-4"
-                onError={(e) => (e.target.src = "https://picsum.photos/150")} // Fallback image
+    <div className="min-h-screen bg-[#F9FAFB] pt-20">
+      <div className="container mx-auto px-4 py-12">
+        <h1 className="text-3xl font-bold text-gray-900 mb-8">My Learning</h1>
+
+        {courses.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {courses.map((course) => (
+              <CourseCard
+                key={course._id}
+                id={course._id}
+                title={course.title}
+                description={course.description}
+                image={course.imageUrl || course.image}
+                isJoined={true}
+                onPrimaryAction={handleRemoveCourse}
+                primaryActionLabel="Remove"
               />
-              <h3 className="text-xl font-bold mb-2">{course.title}</h3>
-              <p className="text-gray-600 mb-4">{course.description}</p>
-              <div className="flex justify-between items-center">
-                <Link
-                  to={`/course/${course.id}`}
-                  className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors"
-                >
-                  View Details
-                </Link>
-                <button
-                  onClick={() => onRemoveCourse(course.id, course.title)}
-                  className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors"
-                  disabled={removingCourseId === course.id}
-                >
-                  Remove
-                </button>
-              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="bg-white rounded-xl shadow-sm p-12 text-center">
+            <div className="w-24 h-24 bg-[#F3F4F6] rounded-full flex items-center justify-center mx-auto mb-6">
+              <svg
+                className="w-12 h-12 text-[#9CA3AF]"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.5}
+                  d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
             </div>
-          ))}
-        </div>
-      ) : (
-        <div className="text-center text-gray-500 py-12">
-          <p className="text-lg">You haven't joined any courses yet.</p>
-          <Link
-            to="/courses"
-            className="mt-4 inline-block bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors"
-          >
-            Explore Courses
-          </Link>
-        </div>
-      )}
+            <h2 className="text-xl font-semibold text-gray-800 mb-2">
+              No courses yet
+            </h2>
+            <p className="text-gray-600 mb-6 max-w-md mx-auto">
+              You haven't joined any courses yet. Explore our course catalog to
+              get started!
+            </p>
+            <button
+              onClick={() => navigate("/courses")}
+              className="px-6 py-3 bg-[#6366F1] text-white rounded-lg font-medium hover:bg-[#4F46E5] transition-colors inline-flex items-center gap-2"
+            >
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
+              Browse Courses
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

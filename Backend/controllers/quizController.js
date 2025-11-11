@@ -34,13 +34,22 @@ const getQuizzesByLanguage = async (req, res) => {
     const Quiz = getQuizModel(language);
     console.log(`Step 2: Using collection: ${Quiz.collection.name}`);
 
-    const quizzes = await Quiz.find({ language }).lean();
-    console.log(`Step 3: Found ${quizzes.length} quizzes for ${language}`);
+    let quizzes = await Quiz.find({ language }).lean();
+    console.log(`Step 3: Found ${quizzes.length} quizzes for ${language} in collection ${Quiz.collection.name}`);
+
+    // Fallback: if per-language collection is empty, try a central 'quizzes' collection
+    if (!quizzes.length) {
+      console.log(`🔁 No quizzes in collection ${Quiz.collection.name}, trying central 'quizzes' collection as fallback`);
+      const CentralQuiz = getQuizModel("quizzes");
+      const fallback = await CentralQuiz.find({ language }).lean();
+      console.log(`Step 4: Found ${fallback.length} quizzes in central 'quizzes' collection for ${language}`);
+      if (fallback.length) {
+        quizzes = fallback;
+      }
+    }
 
     if (!quizzes.length) {
-      return res
-        .status(404)
-        .json({ message: `No quizzes found for language: ${language}` });
+      return res.status(404).json({ message: `No quizzes found for language: ${language}` });
     }
 
     res.status(200).json(quizzes);

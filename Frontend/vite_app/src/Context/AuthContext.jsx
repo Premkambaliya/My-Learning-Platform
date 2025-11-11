@@ -1,11 +1,11 @@
-import { createContext, useState, useEffect } from "react";
+import { createContext, useState, useEffect, useContext } from "react";
 
 // Create context with default value
 export const AuthContext = createContext({
   user: null,
-  login: async () => {},
-  signup: async () => {},
-  logout: () => {},
+  login: async () => { },
+  signup: async () => { },
+  logout: () => { },
   loading: false,
   error: null,
 });
@@ -33,7 +33,8 @@ export const AuthProvider = ({ children }) => {
       });
       const data = await response.json();
       if (response.ok) {
-        setUser(data.user);
+        // Backend returns the user document directly
+        setUser(data);
       } else {
         localStorage.removeItem("token");
       }
@@ -45,6 +46,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // In login function, update the response handling:
   const login = async (email, password) => {
     setError(null);
     try {
@@ -53,14 +55,22 @@ export const AuthProvider = ({ children }) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
-      console.log("Logging in with:", { email, password })
+
       const data = await response.json();
-      if (!response.ok) throw new Error(data.message || "Login failed");
+      if (!response.ok) {
+        throw new Error(data.message || "Login failed");
+      }
+
+      if (!data.token) {
+        throw new Error("No authentication token received");
+      }
+
       localStorage.setItem("token", data.token);
       setUser(data.user);
       return data;
     } catch (err) {
       setError(err.message);
+      localStorage.removeItem("token"); // Clear invalid token if any
       throw err;
     }
   };
@@ -102,4 +112,13 @@ export const AuthProvider = ({ children }) => {
       {children}
     </AuthContext.Provider>
   );
+};
+
+// Add useAuth hook
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
 };

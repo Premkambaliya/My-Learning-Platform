@@ -68,7 +68,7 @@ function CourseDetail() {
       <div className="bg-white border-b border-gray-200">
         <div className="container mx-auto px-4 py-4">
           <Link
-            to="/"
+            to="/courses"
             className="inline-flex items-center text-[#6366F1] hover:text-[#4F46E5] transition-colors font-medium"
           >
             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

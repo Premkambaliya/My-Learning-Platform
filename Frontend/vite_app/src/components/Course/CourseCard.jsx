@@ -1,6 +1,25 @@
 import { Link } from "react-router-dom";
+import { useState } from "react";
+import { toast } from "react-toastify";
 
-function CourseCard({ id, title, description, image, isJoined, handleJoinCourse }) {
+function CourseCard({ id, title, description, image, isJoined, handleJoinCourse, onPrimaryAction, primaryActionLabel }) {
+  const [isLoading, setIsLoading] = useState(false);
+  const handleJoinClick = async () => {
+    if (isLoading) return;
+    
+    try {
+      setIsLoading(true);
+      if (isJoined && onPrimaryAction) {
+        await onPrimaryAction(id);
+      } else {
+        await handleJoinCourse(id);
+      }
+    } catch (error) {
+      toast.error(error.message || "An error occurred");
+    } finally {
+      setIsLoading(false);
+    }
+  };
   return (
     <div className="group bg-white border border-gray-200 rounded-2xl shadow-md overflow-hidden hover:shadow-2xl hover:border-[#6366F1]/30 transition-all duration-300 hover:-translate-y-2">
       {/* Image Container with Overlay */}
@@ -39,17 +58,31 @@ function CourseCard({ id, title, description, image, isJoined, handleJoinCourse 
 
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-3">
-          {/* Join / Joined Button */}
+          {/* Join / Joined / Custom Primary Action Button */}
           <button
-            onClick={() => handleJoinCourse(id)}
-            disabled={isJoined}
+            onClick={handleJoinClick}
+            disabled={isLoading || (isJoined && !onPrimaryAction)}
             className={`flex-1 py-3 px-4 rounded-xl font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${
-              isJoined
+              isJoined && onPrimaryAction
+                ? "bg-red-600 text-white hover:bg-red-700 shadow-md hover:shadow-lg hover:-translate-y-0.5 disabled:opacity-50"
+                : isJoined
                 ? "bg-[#10B981]/10 text-[#10B981] border-2 border-[#10B981]/20 cursor-default"
-                : "bg-[#6366F1] text-white hover:bg-[#4F46E5] shadow-md hover:shadow-lg hover:-translate-y-0.5"
+                : "bg-[#6366F1] text-white hover:bg-[#4F46E5] shadow-md hover:shadow-lg hover:-translate-y-0.5 disabled:opacity-50"
             }`}
           >
-            {isJoined ? (
+            {isLoading ? (
+              <>
+                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                {isJoined && onPrimaryAction ? "Processing..." : "Joining..."}
+              </>
+            ) : isJoined && onPrimaryAction ? (
+              <>
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m-3 0h14" />
+                </svg>
+                {primaryActionLabel || "Remove"}
+              </>
+            ) : isJoined ? (
               <>
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />

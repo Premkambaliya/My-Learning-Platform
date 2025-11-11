@@ -15,7 +15,10 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  // origin: 'http://localhost:5174', // or your frontend URL
+  // credentials: true
+}));
 app.use(express.json());
 
 // Root route
@@ -23,10 +26,10 @@ app.get("/", (req, res) => {
   res.send("Welcome to the Learning API 🚀");
 });
 
-// ✅ FIX: mount quiz routes at `/api` so that `/api/quizzes/:language` works
+// Mount routes with proper prefixes to avoid conflicts
 app.use("/api/auth", authRoutes);
-app.use("/api", quizRoutes); // ✅ changed from "/api/quiz" to "/api"
-app.use("/api", courseRoutes); // already correct
+app.use("/api/quizzes", quizRoutes); // Mount quiz routes at /api/quizzes
+app.use("/api/courses", courseRoutes); // Mount course routes at /api/courses
 
 // MongoDB connection
 mongoose

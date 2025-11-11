@@ -11,16 +11,27 @@
 // module.exports = router;
 
 
-
 // routes/courseRoutes.js
 const express = require("express");
 const router = express.Router();
-const { getCourses, getCourseById } = require("../controllers/courseController");
+const { 
+  getCourses, 
+  getCourseById,
+  joinCourse,
+  leaveCourse,
+  getJoinedCourses
+} = require("../controllers/courseController");
+const auth = require("../middleware/auth");
 
-// GET all courses
-router.get("/courses", getCourses);
+// Public routes
+router.get("/", getCourses);
 
-// GET single course by ID
-router.get("/courses/:id", getCourseById);
+// Protected routes (apply auth per-route)
+router.get("/user/joined", auth, getJoinedCourses);
+router.post("/join/:id", auth, joinCourse);
+router.delete("/leave/:id", auth, leaveCourse);
+
+// Keep this LAST to avoid catching '/user/joined'
+router.get("/:id", getCourseById);
 
 module.exports = router;

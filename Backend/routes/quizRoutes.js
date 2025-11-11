@@ -10,8 +10,9 @@ router.use((req, res, next) => {
   next();
 });
 
-router.get("/quizzes/:language", getQuizzesByLanguage);
-router.post("/quizzes", addQuiz);
+// Now mounted at /api/quizzes in server.js, so use root-level paths here.
+router.get("/:language", getQuizzesByLanguage);
+router.post("/", addQuiz);
 router.post("/query", solveQuery);
 
 module.exports = router;
